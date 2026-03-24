@@ -7,7 +7,7 @@ from typing import Literal, Optional
 class SearchRequest(BaseModel):
     query: str
     search_depth: Literal["advanced", "basic", "fast", "ultra-fast"] = "basic"
-    max_results: int = 10
+    max_results: int = 5
     start_date: Optional[str] = None
     end_date: Optional[str] = None
 

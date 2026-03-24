@@ -11,8 +11,9 @@ class ExtractAgent(WorkerAgent):
         return (
             "You are an expert at extracting and analyzing web content. "
             "You will receive a list of URLs directly. "
-            "Use the extract tool to fetch the content of each URL, "
-            "then analyze it and return only the key facts, data points, "
+            "Call the extract tool ONCE passing ALL URLs as a list — it supports multiple URLs in a single call. "
+            "Do NOT call extract multiple times for individual URLs. "
+            "Then analyze the extracted content and return only the key facts, data points, "
             "and details that are directly relevant to answering the question."
         )
 

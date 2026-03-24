@@ -6,8 +6,6 @@ from tools.redis.redis_tools import redis_set_tool, redis_keys_tool
 
 
 class SearchAgent(WorkerAgent):
-    compact = True
-
     @property
     def system_prompt(self) -> str:
         return (
