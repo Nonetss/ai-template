@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from pydantic_ai import Agent, FunctionToolset, ModelMessage, RunContext
 from pydantic_ai.tools import Tool
+from pydantic_ai.usage import UsageLimits
 from core import model as default_model, compact_model as default_compact_model
 from tools import WorkerTool
 from repositories.conversation_repository import ConversationRepository
@@ -11,6 +12,8 @@ class WorkerAgent(ABC):
     model: str = None
     compact: bool = False
     compact_model: str = None
+    request_limit: int = 25
+    tool_calls_limit: int | None = None
 
     @property
     def instructions(self) -> str | None:
@@ -50,13 +53,24 @@ class WorkerAgent(ABC):
         result = await self._compactor.run(output)
         return str(result.output)
 
+    @property
+    def _usage_limits(self) -> UsageLimits:
+        return UsageLimits(
+            request_limit=self.request_limit,
+            tool_calls_limit=self.tool_calls_limit,
+        )
+
     async def run(self, prompt: str, deps: BaseModel | None = None) -> str:
-        result = await self._agent.run(prompt, deps=deps)
+        result = await self._agent.run(
+            prompt, deps=deps, usage_limits=self._usage_limits
+        )
         return await self._compact_output(str(result.output))
 
     def to_tool(self) -> Tool:
         async def _run(ctx: RunContext, query: str) -> str:
-            result = await self._agent.run(query, usage=ctx.usage, deps=ctx.deps)
+            result = await self._agent.run(
+                query, usage=ctx.usage, deps=ctx.deps, usage_limits=self._usage_limits
+            )
             return await self._compact_output(str(result.output))
 
         _run.__name__ = self.name
@@ -73,6 +87,8 @@ class WorkerAgent(ABC):
 
 class OrchestratorAgent(ABC):
     model: str = None
+    request_limit: int = 50
+    tool_calls_limit: int | None = None
 
     @property
     def instructions(self) -> str | None:
@@ -113,8 +129,15 @@ class OrchestratorAgent(ABC):
                 conversation_id
             )
 
+        usage_limits = UsageLimits(
+            request_limit=self.request_limit,
+            tool_calls_limit=self.tool_calls_limit,
+        )
         result = await self._agent.run(
-            prompt, deps=deps, message_history=message_history
+            prompt,
+            deps=deps,
+            message_history=message_history,
+            usage_limits=usage_limits,
         )
 
         if conversation_id:
