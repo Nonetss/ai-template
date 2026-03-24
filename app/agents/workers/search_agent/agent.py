@@ -7,7 +7,6 @@ from tools.redis.redis_tools import redis_set_tool, redis_keys_tool
 
 class SearchAgent(WorkerAgent):
     has_deps = False
-    sequential_tools = True
 
     @property
     def system_prompt(self) -> str:

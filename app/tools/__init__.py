@@ -11,11 +11,13 @@ class WorkerTool(ABC):
         description: str,
         function: Callable,
         takes_ctx: bool = False,
+        sequential: bool = False,
     ):
         self.name = name
         self.description = description
         self.function = function
         self.takes_ctx = takes_ctx
+        self.sequential = sequential
 
     def to_tool(self) -> Tool:
         return Tool(
@@ -23,4 +25,5 @@ class WorkerTool(ABC):
             takes_ctx=self.takes_ctx,
             name=self.name,
             description=self.description,
+            sequential=self.sequential,
         )

@@ -6,7 +6,6 @@ from tools.redis.redis_tools import redis_get_tool, redis_set_tool
 
 class ExtractAgent(WorkerAgent):
     has_deps = False
-    sequential_tools = True
 
     @property
     def system_prompt(self) -> str:
