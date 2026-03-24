@@ -1,15 +1,17 @@
-from typing import Optional
 from pydantic import BaseModel, Field
 from utils.redis import redis_client
 from tools import WorkerTool
 
 
+DEFAULT_TTL = 1800  # 30 minutes
+
+
 class SetRequest(BaseModel):
     key: str
     value: str
-    ttl: Optional[int] = Field(
-        default=None,
-        description="Time to live in seconds. If not set, the key persists indefinitely.",
+    ttl: int = Field(
+        default=DEFAULT_TTL,
+        description="Time to live in seconds. Defaults to 30 minutes.",
     )
 
 
@@ -54,14 +56,6 @@ def redis_keys(request: KeysRequest) -> str:
     return "\n".join(sorted(keys))
 
 
-def redis_flush(_: None = None) -> str:
-    keys = redis_client.keys("*")
-    if not keys:
-        return "Redis was already empty."
-    redis_client.delete(*keys)
-    return f"Flushed {len(keys)} key(s) from Redis."
-
-
 redis_set_tool = WorkerTool(
     name="redis_set",
     description=(
@@ -97,15 +91,5 @@ redis_keys_tool = WorkerTool(
         "Use '*' to list all keys, or patterns like 'session:42:*' to scope the search."
     ),
     function=redis_keys,
-    takes_ctx=False,
-)
-
-redis_flush_tool = WorkerTool(
-    name="redis_flush",
-    description=(
-        "Delete ALL keys from Redis. Use this at the start of a new request to clear "
-        "stale data from previous runs that is unrelated to the current task."
-    ),
-    function=redis_flush,
     takes_ctx=False,
 )
