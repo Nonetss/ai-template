@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from scalar_fastapi import get_scalar_api_reference
 from pydantic import BaseModel
 
+from api.v0.router import router as v0_router
 from core import (
     LOGFIRE_SERVICE_NAME,
     LOGFIRE_SERVICE_VERSION,
@@ -43,6 +44,8 @@ app.add_middleware(
 )
 
 logfire.instrument_fastapi(app)
+
+app.include_router(v0_router)
 
 
 class HealthResponse(BaseModel):
