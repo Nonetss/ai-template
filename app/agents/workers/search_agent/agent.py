@@ -4,8 +4,12 @@ from tools.curl.search import search_tool
 from tools.date.datetime_tool import current_datetime_tool
 from tools.redis.redis_tools import redis_set_tool, redis_keys_tool
 
+from core.model import worker_model
+
 
 class SearchAgent(WorkerAgent):
+    model = worker_model
+
     @property
     def system_prompt(self) -> str:
         return (

@@ -9,6 +9,7 @@ OPENROUTE_MODEL = os.getenv("OPENROUTE_MODEL", "qwen/qwen3.5-9b")
 OPENROUTE_COMPACT_MODEL = os.getenv(
     "OPENROUTE_COMPACT_MODEL", "qwen/qwen3.5-flash-02-23"
 )
+OPENROUTE_WORKER_MODEL = os.getenv("OPENROUTE_WORKER_MODEL", "qwen/qwen3.5-9b")
 
 # Logfire Environment Variables
 LOGFIRE_SERVICE_NAME = os.getenv("LOGFIRE_SERVICE_NAME", "template")
