@@ -1,7 +1,7 @@
 from agents import WorkerAgent
 from tools import WorkerTool
 from tools.curl.search import search_tool
-from tools.datetime_tool import current_datetime_tool
+from tools.date.datetime_tool import current_datetime_tool
 
 
 class SearchAgent(WorkerAgent):

@@ -2,7 +2,7 @@ from agents import OrchestratorAgent, WorkerAgent
 from agents.workers.search_agent.agent import SearchAgent
 from agents.workers.extract_agent.agent import ExtractAgent
 from tools import WorkerTool
-from tools.datetime_tool import current_datetime_tool
+from tools.date.datetime_tool import current_datetime_tool
 
 
 class SynthesisAgent(OrchestratorAgent):

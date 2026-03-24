@@ -11,6 +11,7 @@ dependencies = [
     "pydantic-ai>=1.70.0",
     "pydantic-ai-skills>=0.5.1",
     "pydantic-ai-slim[google,logfire,openai,openrouter]>=1.70.0",
+    "redis>=7.4.0",
     "scalar-fastapi>=1.8.1",
     "tavily-python>=0.7.23",
 ]
