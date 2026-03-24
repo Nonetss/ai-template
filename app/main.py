@@ -1,5 +1,6 @@
 import logfire
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,7 @@ from scalar_fastapi import get_scalar_api_reference
 from pydantic import BaseModel
 
 from api.v0.router import router as v0_router
+from utils.database import init_db, close_db
 from core import (
     LOGFIRE_SERVICE_NAME,
     LOGFIRE_SERVICE_VERSION,
@@ -27,11 +29,19 @@ logfire.configure(
 logfire.instrument_pydantic_ai()
 
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await init_db()
+    yield
+    await close_db()
+
+
 app = FastAPI(
     title=LOGFIRE_SERVICE_NAME,
     version=LOGFIRE_SERVICE_VERSION,
     docs_url=None,
     redoc_url=None,
+    lifespan=lifespan,
 )
 
 

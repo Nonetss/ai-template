@@ -1,15 +1,26 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
-from sqlalchemy.orm import DeclarativeBase
+from tortoise import Tortoise
 from core.config import DATABASE_URL
 
-engine = create_async_engine(DATABASE_URL)
-async_session = async_sessionmaker(engine, expire_on_commit=False)
+# Tortoise espera "postgres://" — convertimos desde el formato SQLAlchemy si hace falta
+_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgres://")
 
-
-class Base(DeclarativeBase):
-    pass
+TORTOISE_ORM = {
+    "connections": {
+        "default": _db_url,
+    },
+    "apps": {
+        "models": {
+            "models": ["models.conversation"],
+            "default_connection": "default",
+        },
+    },
+}
 
 
 async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    await Tortoise.init(config=TORTOISE_ORM)
+    await Tortoise.generate_schemas()
+
+
+async def close_db():
+    await Tortoise.close_connections()
