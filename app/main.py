@@ -4,6 +4,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from scalar_fastapi import get_scalar_api_reference
+from pydantic import BaseModel
 
 from core import (
     LOGFIRE_SERVICE_NAME,
@@ -42,6 +43,16 @@ app.add_middleware(
 )
 
 logfire.instrument_fastapi(app)
+
+
+class HealthResponse(BaseModel):
+    status: str
+    version: str
+
+
+@app.get("/health", response_model=HealthResponse, tags=["System"])
+async def healthcheck():
+    return HealthResponse(status="ok", version=LOGFIRE_SERVICE_VERSION)
 
 
 @app.get("/docs", include_in_schema=False)
