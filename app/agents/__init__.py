@@ -11,7 +11,11 @@ class WorkerAgent(ABC):
 
     @property
     @abstractmethod
-    def system_prompt(self) -> str: ...
+    def instructions(self) -> str: ...
+
+    @property
+    def system_prompt(self) -> str | None:
+        return None
 
     @property
     @abstractmethod
@@ -22,7 +26,8 @@ class WorkerAgent(ABC):
         self.description = description
         self._agent = Agent(
             model,
-            system_prompt=self.system_prompt,
+            instructions=self.instructions,
+            system_prompt=self.system_prompt or (),
             toolsets=[FunctionToolset(tools=[t.to_tool() for t in self.tools])],
         )
 
@@ -49,7 +54,11 @@ class OrchestratorAgent(ABC):
 
     @property
     @abstractmethod
-    def system_prompt(self) -> str: ...
+    def instructions(self) -> str: ...
+
+    @property
+    def system_prompt(self) -> str | None:
+        return None
 
     @property
     @abstractmethod
@@ -65,7 +74,8 @@ class OrchestratorAgent(ABC):
         ]
         self._agent = Agent(
             model,
-            system_prompt=self.system_prompt,
+            instructions=self.instructions,
+            system_prompt=self.system_prompt or (),
             toolsets=[FunctionToolset(tools=all_tools)],
         )
 

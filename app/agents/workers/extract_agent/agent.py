@@ -8,7 +8,7 @@ class ExtractAgent(WorkerAgent):
     has_deps = False
 
     @property
-    def system_prompt(self) -> str:
+    def instructions(self) -> str:
         return (
             "You are an expert at verifying and mining information from sources. "
             "You will receive Redis keys pointing to URL lists saved by the search agent. "
