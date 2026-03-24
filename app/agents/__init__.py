@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pydantic import BaseModel
 from pydantic_ai import Agent, FunctionToolset, RunContext
 from pydantic_ai.tools import Tool
 from core import model
@@ -6,6 +7,8 @@ from tools import WorkerTool
 
 
 class WorkerAgent(ABC):
+    has_deps: bool = False
+
     @property
     @abstractmethod
     def system_prompt(self) -> str: ...
@@ -23,13 +26,16 @@ class WorkerAgent(ABC):
             toolsets=[FunctionToolset(tools=[t.to_tool() for t in self.tools])],
         )
 
-    async def run(self, prompt: str, deps=None) -> str:
+    async def run(self, prompt: str, deps: BaseModel | None = None) -> str:
         result = await self._agent.run(prompt, deps=deps)
         return str(result.output)
 
     def to_tool(self) -> Tool:
         async def _run(ctx: RunContext, query: str) -> str:
-            result = await self._agent.run(query, usage=ctx.usage)
+            if self.has_deps:
+                result = await self._agent.run(query, usage=ctx.usage, deps=ctx.deps)
+            else:
+                result = await self._agent.run(query, usage=ctx.usage)
             return str(result.output)
 
         _run.__name__ = self.name
@@ -39,6 +45,8 @@ class WorkerAgent(ABC):
 
 
 class OrchestratorAgent(ABC):
+    has_deps: bool = False
+
     @property
     @abstractmethod
     def system_prompt(self) -> str: ...
@@ -54,6 +62,9 @@ class OrchestratorAgent(ABC):
             toolsets=[FunctionToolset(tools=[w.to_tool() for w in self.workers])],
         )
 
-    async def run(self, prompt: str, deps=None) -> str:
-        result = await self._agent.run(prompt, deps=deps)
+    async def run(self, prompt: str, deps: BaseModel | None = None) -> str:
+        if self.has_deps:
+            result = await self._agent.run(prompt, deps=deps)
+        else:
+            result = await self._agent.run(prompt)
         return str(result.output)
