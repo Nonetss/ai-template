@@ -20,6 +20,11 @@ LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv(
 # Redis Environment Variables
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
+# PostgreSQL Environment Variables
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+asyncpg://agent:agent@localhost:5432/agent"
+)
+
 # Tavily Environment Variables
 TAVILY_API_BASE_URL = os.getenv("TAVILY_API_BASE_URL", "https://api.tavily.io/v1")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
