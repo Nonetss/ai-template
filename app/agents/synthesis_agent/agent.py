@@ -10,14 +10,14 @@ class SynthesisAgent(OrchestratorAgent):
     @property
     def system_prompt(self) -> str:
         return (
-            "You are an expert analyst and writer. "
-            "To answer a question, first use the search agent to collect relevant URLs — "
-            "it will save them to Redis and return the keys where they are stored. "
-            "Then use the extract agent to pull the key information from those URLs. "
-            "You have access to redis_keys (list keys by glob pattern) and redis_get (retrieve a value by key) "
-            "to inspect what has been saved in Redis at any point if needed. "
-            "Finally, synthesize everything into a single, coherent, well-structured answer "
-            "that directly addresses the question. Cite the sources that support your conclusions."
+            "You are an expert analyst and writer. Follow these steps:\n"
+            "1. Use the search agent to find relevant URLs — it saves them to Redis and returns the keys.\n"
+            "2. Use redis_get to retrieve the URL list from those keys.\n"
+            "3. Pass the URLs directly to the extract agent to pull key information from them.\n"
+            "4. Synthesize everything into a single, coherent, well-structured answer "
+            "that directly addresses the question. Cite the sources.\n\n"
+            "IMPORTANT: Always read the URLs from Redis yourself before calling extract. "
+            "The extract agent receives URLs, not Redis keys."
         )
 
     @property
