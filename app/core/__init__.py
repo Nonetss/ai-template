@@ -7,7 +7,7 @@ from .config import (
     LOGFIRE_SEND_TO_LOGFIRE,
     LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT,
 )
-from .model import model
+from .model import model, compact_model
 
 __all__ = [
     "OPENROUTE_API_KEY",
@@ -18,4 +18,5 @@ __all__ = [
     "LOGFIRE_SEND_TO_LOGFIRE",
     "LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT",
     "model",
+    "compact_model",
 ]

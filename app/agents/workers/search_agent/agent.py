@@ -3,12 +3,10 @@ from tools import WorkerTool
 from tools.curl.search import search_tool
 from tools.date.datetime_tool import current_datetime_tool
 from tools.redis.redis_tools import redis_set_tool, redis_keys_tool
-from core.config import OPENROUTE_COMPACT_MODEL
 
 
 class SearchAgent(WorkerAgent):
     compact = True
-    compact_model = OPENROUTE_COMPACT_MODEL
 
     @property
     def system_prompt(self) -> str:

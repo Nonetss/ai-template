@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from pydantic_ai import Agent, FunctionToolset, ModelMessage, RunContext
 from pydantic_ai.tools import Tool
-from core import model as default_model
+from core import model as default_model, compact_model as default_compact_model
 from tools import WorkerTool
 from repositories.conversation_repository import ConversationRepository
 
@@ -36,7 +36,7 @@ class WorkerAgent(ABC):
         )
         if self.compact:
             self._compactor = Agent(
-                self.compact_model or default_model,
+                self.compact_model or default_compact_model,
                 system_prompt=(
                     "You are a summarizer. Condense the following tool output into a concise summary "
                     "that preserves all key facts, data points, and actionable information. "
