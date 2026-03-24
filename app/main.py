@@ -1,15 +1,17 @@
-from pydantic_ai import Agent
+import logfire
+import os
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from scalar_fastapi import get_scalar_api_reference
+
 from core import (
     LOGFIRE_SERVICE_NAME,
     LOGFIRE_SERVICE_VERSION,
     LOGFIRE_ENVIRONMENT,
     LOGFIRE_SEND_TO_LOGFIRE,
     LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT,
-    model,
 )
-import asyncio
-import logfire
-import os
 
 os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT
 os.environ["OTEL_METRICS_EXPORTER"] = "none"
@@ -22,13 +24,30 @@ logfire.configure(
 )
 logfire.instrument_pydantic_ai()
 
-agent = Agent(model)
+
+app = FastAPI(
+    title=LOGFIRE_SERVICE_NAME,
+    version=LOGFIRE_SERVICE_VERSION,
+    docs_url=None,
+    redoc_url=None,
+)
 
 
-async def main():
-    response = await agent.run("Hello, how are you?")
-    print(response)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+logfire.instrument_fastapi(app)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+@app.get("/docs", include_in_schema=False)
+async def scalar_html():
+    return get_scalar_api_reference(
+        openapi_url=app.openapi_url,
+        title=app.title,
+        dark_mode=True,
+    )
