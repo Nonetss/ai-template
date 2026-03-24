@@ -10,8 +10,8 @@ class WorkerAgent(ABC):
     has_deps: bool = False
 
     @property
-    @abstractmethod
-    def instructions(self) -> str: ...
+    def instructions(self) -> str | None:
+        return None
 
     @property
     def system_prompt(self) -> str | None:
@@ -53,8 +53,8 @@ class OrchestratorAgent(ABC):
     has_deps: bool = False
 
     @property
-    @abstractmethod
-    def instructions(self) -> str: ...
+    def instructions(self) -> str | None:
+        return None
 
     @property
     def system_prompt(self) -> str | None:

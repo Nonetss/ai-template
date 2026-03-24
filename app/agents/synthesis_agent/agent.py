@@ -10,7 +10,7 @@ class SynthesisAgent(OrchestratorAgent):
     has_deps = False
 
     @property
-    def instructions(self) -> str:
+    def system_prompt(self) -> str:
         return (
             "You are an expert analyst and writer. "
             "To answer a question, first use the search agent to collect relevant URLs — "

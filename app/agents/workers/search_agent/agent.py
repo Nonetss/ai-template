@@ -9,7 +9,7 @@ class SearchAgent(WorkerAgent):
     has_deps = False
 
     @property
-    def instructions(self) -> str:
+    def system_prompt(self) -> str:
         return (
             "You are an expert at finding relevant sources on the web. "
             "Given a topic or question, your only goal is to search and collect "
