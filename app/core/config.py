@@ -15,3 +15,8 @@ LOGFIRE_SEND_TO_LOGFIRE = os.getenv("LOGFIRE_SEND_TO_LOGFIRE", False)
 LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv(
     "LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318"
 )
+
+
+# Tavily Environment Variables
+TAVILY_API_BASE_URL = os.getenv("TAVILY_API_BASE_URL", "https://api.tavily.io/v1")
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
