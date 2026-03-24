@@ -1,14 +1,11 @@
 from pydantic_ai import Agent
-from pydantic_ai.models.openrouter import OpenRouterModel
-from pydantic_ai.providers.openrouter import OpenRouterProvider
 from core import (
-    OPENROUTE_API_KEY,
-    OPENROUTE_MODEL,
     LOGFIRE_SERVICE_NAME,
     LOGFIRE_SERVICE_VERSION,
     LOGFIRE_ENVIRONMENT,
     LOGFIRE_SEND_TO_LOGFIRE,
     LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT,
+    model,
 )
 import asyncio
 import logfire
@@ -25,10 +22,6 @@ logfire.configure(
 )
 logfire.instrument_pydantic_ai()
 
-model = OpenRouterModel(
-    OPENROUTE_MODEL,
-    provider=OpenRouterProvider(api_key=OPENROUTE_API_KEY),
-)
 agent = Agent(model)
 
 

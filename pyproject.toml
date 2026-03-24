@@ -5,9 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "fastapi[standard]>=0.135.2",
     "load-dotenv>=0.1.0",
     "pydantic-ai>=1.70.0",
+    "pydantic-ai-skills>=0.5.1",
     "pydantic-ai-slim[google,logfire,openai,openrouter]>=1.70.0",
+    "scalar-fastapi>=1.8.1",
 ]
 
 [dependency-groups]
