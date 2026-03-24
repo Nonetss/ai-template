@@ -1,11 +1,15 @@
-from pydantic_ai import Agent, FunctionToolset
-from core import model
-from tools.example.tools import get_current_time
+from agents import WorkerAgent
+from tools import WorkerTool
+from tools.example.tools import current_time_tool
 
-toolset = FunctionToolset(tools=[get_current_time])
 
-example_agent = Agent(
-    model,
-    system_prompt="You are a specialized agent. Describe your purpose here.",
-    toolsets=[toolset],
-)
+class ExampleAgent(WorkerAgent):
+    has_deps = False
+
+    @property
+    def system_prompt(self) -> str:
+        return "You are a specialized agent. Describe your purpose here."
+
+    @property
+    def tools(self) -> list[WorkerTool]:
+        return [current_time_tool]
