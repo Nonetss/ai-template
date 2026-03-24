@@ -5,6 +5,8 @@ from tools.redis.redis_tools import redis_get_tool, redis_set_tool
 
 
 class ExtractAgent(WorkerAgent):
+    compact = True
+
     @property
     def system_prompt(self) -> str:
         return (

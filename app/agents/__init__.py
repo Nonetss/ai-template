@@ -9,6 +9,8 @@ from repositories.conversation_repository import ConversationRepository
 
 class WorkerAgent(ABC):
     model: str = None
+    compact: bool = False
+    compact_model: str = None
 
     @property
     def instructions(self) -> str | None:
@@ -32,15 +34,30 @@ class WorkerAgent(ABC):
             system_prompt=self.system_prompt or (),
             toolsets=[FunctionToolset(tools=[t.to_tool() for t in self.tools])],
         )
+        if self.compact:
+            self._compactor = Agent(
+                self.compact_model or default_model,
+                system_prompt=(
+                    "You are a summarizer. Condense the following tool output into a concise summary "
+                    "that preserves all key facts, data points, and actionable information. "
+                    "Remove redundancy, filler, and formatting noise. Be brief."
+                ),
+            )
+
+    async def _compact_output(self, output: str) -> str:
+        if not self.compact:
+            return output
+        result = await self._compactor.run(output)
+        return str(result.output)
 
     async def run(self, prompt: str, deps: BaseModel | None = None) -> str:
         result = await self._agent.run(prompt, deps=deps)
-        return str(result.output)
+        return await self._compact_output(str(result.output))
 
     def to_tool(self) -> Tool:
         async def _run(ctx: RunContext, query: str) -> str:
             result = await self._agent.run(query, usage=ctx.usage, deps=ctx.deps)
-            return str(result.output)
+            return await self._compact_output(str(result.output))
 
         _run.__name__ = self.name
         _run.__doc__ = self.description
