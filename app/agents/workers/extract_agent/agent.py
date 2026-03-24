@@ -1,4 +1,5 @@
 from agents import WorkerAgent
+from core.config import OPENROUTE_COMPACT_MODEL
 from tools import WorkerTool
 from tools.curl.extract import extract_tool
 from tools.redis.redis_tools import redis_get_tool, redis_set_tool
@@ -6,6 +7,7 @@ from tools.redis.redis_tools import redis_get_tool, redis_set_tool
 
 class ExtractAgent(WorkerAgent):
     compact = True
+    compact_model = OPENROUTE_COMPACT_MODEL
 
     @property
     def system_prompt(self) -> str:

@@ -6,6 +6,9 @@ load_dotenv()
 # OpenRouter Environment Variables
 OPENROUTE_API_KEY = os.getenv("OPENROUTE_API_KEY")
 OPENROUTE_MODEL = os.getenv("OPENROUTE_MODEL", "qwen/qwen3.5-9b")
+OPENROUTE_COMPACT_MODEL = os.getenv(
+    "OPENROUTE_COMPACT_MODEL", "qwen/qwen3.5-flash-02-23"
+)
 
 # Logfire Environment Variables
 LOGFIRE_SERVICE_NAME = os.getenv("LOGFIRE_SERVICE_NAME", "template")
