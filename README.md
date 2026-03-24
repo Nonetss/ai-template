@@ -8,7 +8,9 @@ Framework multi-agente construido sobre [pydantic-ai](https://ai.pydantic.dev/) 
 OrchestratorAgent
 ├── WorkerAgent (search, extract, ...)
 ├── WorkerTool  (redis, datetime, ...)
-└── message_history (conversaciones multi-turno)
+└── Conversation persistence (PostgreSQL + Tortoise ORM)
+    ├── Conversation (id, title, timestamps)
+    └── Message (id, role, kind, payload JSON, FK → Conversation)
 ```
 
 ### Clases base (`app/agents/__init__.py`)
@@ -49,7 +51,7 @@ Agente que coordina workers y tools propias. Soporta historial de mensajes para 
 | `tools` | `list[WorkerTool]` | No | Tools adicionales del propio orquestador. Default `[]`. |
 | `has_deps` | `bool` | No | Default `False`. |
 
-Su metodo `run()` devuelve una tupla `(output, messages)` para poder encadenar conversaciones:
+Su metodo `run()` devuelve una tupla `(output, conversation_id)`. La persistencia es automatica: crea una conversacion nueva si no se pasa `conversation_id`, o continua una existente si se pasa:
 
 ```python
 class SynthesisAgent(OrchestratorAgent):
@@ -91,19 +93,41 @@ Ambas propiedades son opcionales. La diferencia es como se comportan con el hist
 
 En la mayoria de casos `system_prompt` es suficiente. Usa `instructions` si necesitas que el prompt se reevalue limpio en cada llamada sin arrastrar contexto de agentes previos.
 
-## Historial de mensajes
+## Persistencia de conversaciones
 
-El `OrchestratorAgent` soporta conversaciones multi-turno pasando el historial entre llamadas:
+El `OrchestratorAgent` persiste automaticamente el historial en PostgreSQL usando Tortoise ORM. Cada mensaje se guarda como una fila individual con su `role`, `kind` y `payload` JSON, vinculado a una `Conversation` via FK.
 
 ```python
 agent = SynthesisAgent()
 
-# Primera pregunta
-output, history = await agent.run("¿Por que baja el oro?")
+# Primera pregunta — crea conversacion nueva
+output, conv_id = await agent.run("¿Por que baja el oro?")
 
-# Siguiente pregunta con contexto de la anterior
-output2, history2 = await agent.run("¿Y la plata?", message_history=history)
+# Siguiente pregunta — continua la misma conversacion
+output2, conv_id = await agent.run("¿Y la plata?", conversation_id=conv_id)
 ```
+
+### Modelos (`app/models/conversation.py`)
+
+| Modelo | Campos | Descripcion |
+|---|---|---|
+| `Conversation` | `id`, `title`, `created_at`, `updated_at` | Agrupa mensajes de una conversacion |
+| `Message` | `id`, `conversation` (FK), `role`, `kind`, `payload` (JSON), `created_at` | Mensaje individual serializado desde pydantic-ai |
+
+- `role`: `user` o `assistant`
+- `kind`: `request` o `response` (discriminador de pydantic-ai)
+- `payload`: JSON completo del `ModelMessage` (incluye parts, tool calls, etc.)
+
+### Repository (`app/repositories/conversation_repository.py`)
+
+| Metodo | Descripcion |
+|---|---|
+| `create(title?)` | Crea una conversacion nueva |
+| `get(id)` | Obtiene una conversacion por ID |
+| `save_messages(id, messages)` | Guarda una lista de `ModelMessage` como filas individuales |
+| `load_messages(id)` | Carga y deserializa todos los mensajes de una conversacion |
+| `list_all()` | Lista todas las conversaciones ordenadas por `updated_at` |
+| `delete(id)` | Elimina una conversacion y sus mensajes (CASCADE) |
 
 ## Estructura del proyecto
 
@@ -127,8 +151,13 @@ app/
 │   │   └── extract.py           # extract_tool
 │   └── redis/
 │       └── redis_tools.py       # redis_set, redis_get, redis_delete, redis_keys
+├── models/
+│   └── conversation.py          # Conversation, Message (Tortoise ORM)
+├── repositories/
+│   └── conversation_repository.py # CRUD + save/load messages
 ├── core/
-│   └── config.py                # Modelo, Redis URL, Logfire config
+│   └── config.py                # Modelo, Redis URL, DATABASE_URL, Logfire config
 └── utils/
+    ├── database.py              # Tortoise ORM init/close
     └── redis.py                 # Redis client
 ```
