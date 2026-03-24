@@ -3,6 +3,7 @@ from agents.workers.search_agent.agent import SearchAgent
 from agents.workers.extract_agent.agent import ExtractAgent
 from tools import WorkerTool
 from tools.date.datetime_tool import current_datetime_tool
+from tools.redis.redis_tools import redis_get_tool, redis_keys_tool
 
 
 class SynthesisAgent(OrchestratorAgent):
@@ -12,8 +13,11 @@ class SynthesisAgent(OrchestratorAgent):
     def system_prompt(self) -> str:
         return (
             "You are an expert analyst and writer. "
-            "To answer a question, first use the search agent to collect relevant URLs, "
-            "then use the extract agent to pull the key information from those URLs. "
+            "To answer a question, first use the search agent to collect relevant URLs — "
+            "it will save them to Redis and return the keys where they are stored. "
+            "Then use the extract agent to pull the key information from those URLs. "
+            "You have access to redis_keys (list keys by glob pattern) and redis_get (retrieve a value by key) "
+            "to inspect what has been saved in Redis at any point if needed. "
             "Finally, synthesize everything into a single, coherent, well-structured answer "
             "that directly addresses the question. Cite the sources that support your conclusions."
         )
@@ -33,7 +37,7 @@ class SynthesisAgent(OrchestratorAgent):
 
     @property
     def tools(self) -> list[WorkerTool]:
-        return [current_datetime_tool]
+        return [current_datetime_tool, redis_get_tool, redis_keys_tool]
 
 
 if __name__ == "__main__":
