@@ -63,17 +63,27 @@ if __name__ == "__main__":
     )
     logfire.instrument_pydantic_ai()
 
-    agent = SynthesisAgent()
+    from utils.database import init_db, close_db
 
-    pregunta = (
-        "Por qué el precio del oro a día de hoy está disminuyendo "
-        "si actualmente hay más incertidumbre? Explica las razones "
-        "y cita las fuentes relevantes."
-    )
-    output, history = asyncio.run(agent.run(pregunta))
-    print(output)
+    async def main():
+        await init_db()
 
-    # Continuación de la conversación usando el historial
-    followup = "¿Y qué efecto tiene esto en la plata?"
-    output2, history2 = asyncio.run(agent.run(followup, message_history=history))
-    print(output2)
+        agent = SynthesisAgent()
+
+        pregunta = (
+            "Por qué el precio del oro a día de hoy está disminuyendo "
+            "si actualmente hay más incertidumbre? Explica las razones "
+            "y cita las fuentes relevantes."
+        )
+        output, conv_id = await agent.run(pregunta)
+        print(output)
+        print(f"\n[Conversation ID: {conv_id}]")
+
+        # Continuación de la conversación usando el mismo conversation_id
+        followup = "¿Y qué efecto tiene esto en la plata?"
+        output2, conv_id = await agent.run(followup, conversation_id=conv_id)
+        print(output2)
+
+        await close_db()
+
+    asyncio.run(main())

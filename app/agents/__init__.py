@@ -4,6 +4,7 @@ from pydantic_ai import Agent, FunctionToolset, ModelMessage, RunContext
 from pydantic_ai.tools import Tool
 from core import model
 from tools import WorkerTool
+from repositories.conversation_repository import ConversationRepository
 
 
 class WorkerAgent(ABC):
@@ -84,11 +85,37 @@ class OrchestratorAgent(ABC):
         prompt: str,
         deps: BaseModel | None = None,
         message_history: list[ModelMessage] | None = None,
-    ) -> tuple[str, list[ModelMessage]]:
+        conversation_id: str | None = None,
+    ) -> tuple[str, str]:
+        """Run the orchestrator agent.
+
+        Args:
+            prompt: The user prompt.
+            deps: Optional dependencies.
+            message_history: In-memory message history (ignored if conversation_id is set).
+            conversation_id: If set, loads/saves history from DB. If None, creates a new conversation.
+
+        Returns:
+            Tuple of (output, conversation_id).
+        """
+        # Cargar historial desde DB o crear conversación nueva
+        if conversation_id:
+            message_history = await ConversationRepository.load_messages(
+                conversation_id
+            )
+        else:
+            conversation = await ConversationRepository.create()
+            conversation_id = conversation.id
+
         if self.has_deps:
             result = await self._agent.run(
                 prompt, deps=deps, message_history=message_history
             )
         else:
             result = await self._agent.run(prompt, message_history=message_history)
-        return str(result.output), result.all_messages()
+
+        # Persistir los mensajes nuevos (solo los que no estaban en el historial)
+        new_messages = result.new_messages()
+        await ConversationRepository.save_messages(conversation_id, new_messages)
+
+        return str(result.output), conversation_id
