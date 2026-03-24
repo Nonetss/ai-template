@@ -54,6 +54,14 @@ def redis_keys(request: KeysRequest) -> str:
     return "\n".join(sorted(keys))
 
 
+def redis_flush(_: None = None) -> str:
+    keys = redis_client.keys("*")
+    if not keys:
+        return "Redis was already empty."
+    redis_client.delete(*keys)
+    return f"Flushed {len(keys)} key(s) from Redis."
+
+
 redis_set_tool = WorkerTool(
     name="redis_set",
     description=(
@@ -89,5 +97,15 @@ redis_keys_tool = WorkerTool(
         "Use '*' to list all keys, or patterns like 'session:42:*' to scope the search."
     ),
     function=redis_keys,
+    takes_ctx=False,
+)
+
+redis_flush_tool = WorkerTool(
+    name="redis_flush",
+    description=(
+        "Delete ALL keys from Redis. Use this at the start of a new request to clear "
+        "stale data from previous runs that is unrelated to the current task."
+    ),
+    function=redis_flush,
     takes_ctx=False,
 )
