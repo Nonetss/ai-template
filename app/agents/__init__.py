@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
-from pydantic_ai import Agent, FunctionToolset, RunContext
+from pydantic_ai import Agent, FunctionToolset, ModelMessage, RunContext
 from pydantic_ai.tools import Tool
 from core import model
 from tools import WorkerTool
@@ -79,9 +79,16 @@ class OrchestratorAgent(ABC):
             toolsets=[FunctionToolset(tools=all_tools)],
         )
 
-    async def run(self, prompt: str, deps: BaseModel | None = None) -> str:
+    async def run(
+        self,
+        prompt: str,
+        deps: BaseModel | None = None,
+        message_history: list[ModelMessage] | None = None,
+    ) -> tuple[str, list[ModelMessage]]:
         if self.has_deps:
-            result = await self._agent.run(prompt, deps=deps)
+            result = await self._agent.run(
+                prompt, deps=deps, message_history=message_history
+            )
         else:
-            result = await self._agent.run(prompt)
-        return str(result.output)
+            result = await self._agent.run(prompt, message_history=message_history)
+        return str(result.output), result.all_messages()

@@ -63,10 +63,17 @@ if __name__ == "__main__":
     )
     logfire.instrument_pydantic_ai()
 
+    agent = SynthesisAgent()
+
     pregunta = (
         "Por qué el precio del oro a día de hoy está disminuyendo "
         "si actualmente hay más incertidumbre? Explica las razones "
         "y cita las fuentes relevantes."
     )
-    result = asyncio.run(SynthesisAgent().run(pregunta))
-    print(result)
+    output, history = asyncio.run(agent.run(pregunta))
+    print(output)
+
+    # Continuación de la conversación usando el historial
+    followup = "¿Y qué efecto tiene esto en la plata?"
+    output2, history2 = asyncio.run(agent.run(followup, message_history=history))
+    print(output2)
