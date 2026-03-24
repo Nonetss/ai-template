@@ -9,6 +9,7 @@ from repositories.conversation_repository import ConversationRepository
 
 class WorkerAgent(ABC):
     has_deps: bool = False
+    sequential_tools: bool = False
 
     @property
     def instructions(self) -> str | None:
@@ -25,11 +26,15 @@ class WorkerAgent(ABC):
     def __init__(self, name: str, description: str):
         self.name = name
         self.description = description
+        all_tools = [t.to_tool() for t in self.tools]
+        if self.sequential_tools:
+            for tool in all_tools:
+                tool.sequential = True
         self._agent = Agent(
             model,
             instructions=self.instructions,
             system_prompt=self.system_prompt or (),
-            toolsets=[FunctionToolset(tools=[t.to_tool() for t in self.tools])],
+            toolsets=[FunctionToolset(tools=all_tools)],
         )
 
     async def run(self, prompt: str, deps: BaseModel | None = None) -> str:
@@ -52,6 +57,7 @@ class WorkerAgent(ABC):
 
 class OrchestratorAgent(ABC):
     has_deps: bool = False
+    sequential_tools: bool = False
 
     @property
     def instructions(self) -> str | None:
@@ -73,6 +79,9 @@ class OrchestratorAgent(ABC):
         all_tools = [w.to_tool() for w in self.workers] + [
             t.to_tool() for t in self.tools
         ]
+        if self.sequential_tools:
+            for tool in all_tools:
+                tool.sequential = True
         self._agent = Agent(
             model,
             instructions=self.instructions,
