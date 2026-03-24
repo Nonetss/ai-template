@@ -7,8 +7,6 @@ from tools.redis.redis_tools import redis_get_tool, redis_keys_tool
 
 
 class SynthesisAgent(OrchestratorAgent):
-    has_deps = False
-
     @property
     def system_prompt(self) -> str:
         return (
@@ -63,11 +61,7 @@ if __name__ == "__main__":
     )
     logfire.instrument_pydantic_ai()
 
-    from utils.database import init_db, close_db
-
     async def main():
-        await init_db()
-
         agent = SynthesisAgent()
 
         pregunta = (
@@ -75,15 +69,13 @@ if __name__ == "__main__":
             "si actualmente hay más incertidumbre? Explica las razones "
             "y cita las fuentes relevantes."
         )
-        output, conv_id = await agent.run(pregunta)
+        # Sin DB — in-memory
+        output, history = await agent.run(pregunta)
         print(output)
-        print(f"\n[Conversation ID: {conv_id}]")
 
-        # Continuación de la conversación usando el mismo conversation_id
+        # Continuación con historial en memoria
         followup = "¿Y qué efecto tiene esto en la plata?"
-        output2, conv_id = await agent.run(followup, conversation_id=conv_id)
+        output2, _ = await agent.run(followup, message_history=history)
         print(output2)
-
-        await close_db()
 
     asyncio.run(main())

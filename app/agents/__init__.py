@@ -2,13 +2,13 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from pydantic_ai import Agent, FunctionToolset, ModelMessage, RunContext
 from pydantic_ai.tools import Tool
-from core import model
+from core import model as default_model
 from tools import WorkerTool
 from repositories.conversation_repository import ConversationRepository
 
 
 class WorkerAgent(ABC):
-    has_deps: bool = False
+    model: str = None
 
     @property
     def instructions(self) -> str | None:
@@ -19,15 +19,15 @@ class WorkerAgent(ABC):
         return None
 
     @property
-    @abstractmethod
-    def tools(self) -> list[WorkerTool]: ...
+    def tools(self) -> list[WorkerTool]:
+        return []
 
     def __init__(self, name: str, description: str, sequential: bool = False):
         self.name = name
         self.description = description
         self.sequential = sequential
         self._agent = Agent(
-            model,
+            self.model or default_model,
             instructions=self.instructions,
             system_prompt=self.system_prompt or (),
             toolsets=[FunctionToolset(tools=[t.to_tool() for t in self.tools])],
@@ -39,10 +39,7 @@ class WorkerAgent(ABC):
 
     def to_tool(self) -> Tool:
         async def _run(ctx: RunContext, query: str) -> str:
-            if self.has_deps:
-                result = await self._agent.run(query, usage=ctx.usage, deps=ctx.deps)
-            else:
-                result = await self._agent.run(query, usage=ctx.usage)
+            result = await self._agent.run(query, usage=ctx.usage, deps=ctx.deps)
             return str(result.output)
 
         _run.__name__ = self.name
@@ -58,7 +55,7 @@ class WorkerAgent(ABC):
 
 
 class OrchestratorAgent(ABC):
-    has_deps: bool = False
+    model: str = None
 
     @property
     def instructions(self) -> str | None:
@@ -81,7 +78,7 @@ class OrchestratorAgent(ABC):
             t.to_tool() for t in self.tools
         ]
         self._agent = Agent(
-            model,
+            self.model or default_model,
             instructions=self.instructions,
             system_prompt=self.system_prompt or (),
             toolsets=[FunctionToolset(tools=all_tools)],
@@ -93,36 +90,19 @@ class OrchestratorAgent(ABC):
         deps: BaseModel | None = None,
         message_history: list[ModelMessage] | None = None,
         conversation_id: str | None = None,
-    ) -> tuple[str, str]:
-        """Run the orchestrator agent.
-
-        Args:
-            prompt: The user prompt.
-            deps: Optional dependencies.
-            message_history: In-memory message history (ignored if conversation_id is set).
-            conversation_id: If set, loads/saves history from DB. If None, creates a new conversation.
-
-        Returns:
-            Tuple of (output, conversation_id).
-        """
-        # Cargar historial desde DB o crear conversación nueva
+    ) -> tuple[str, list[ModelMessage]]:
         if conversation_id:
             message_history = await ConversationRepository.load_messages(
                 conversation_id
             )
-        else:
-            conversation = await ConversationRepository.create()
-            conversation_id = conversation.id
 
-        if self.has_deps:
-            result = await self._agent.run(
-                prompt, deps=deps, message_history=message_history
+        result = await self._agent.run(
+            prompt, deps=deps, message_history=message_history
+        )
+
+        if conversation_id:
+            await ConversationRepository.save_messages(
+                conversation_id, result.new_messages()
             )
-        else:
-            result = await self._agent.run(prompt, message_history=message_history)
 
-        # Persistir los mensajes nuevos (solo los que no estaban en el historial)
-        new_messages = result.new_messages()
-        await ConversationRepository.save_messages(conversation_id, new_messages)
-
-        return str(result.output), conversation_id
+        return str(result.output), result.all_messages()
