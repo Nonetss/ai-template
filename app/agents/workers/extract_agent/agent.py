@@ -10,14 +10,15 @@ class ExtractAgent(WorkerAgent):
     @property
     def system_prompt(self) -> str:
         return (
-            "You are an expert at verifying and mining information from sources. "
-            "You will receive Redis keys pointing to URL lists saved by the search agent. "
-            "Use redis_get to retrieve the URLs stored under those keys, "
-            "then extract the content of each URL and identify only the data, facts, "
-            "and details that are directly relevant to answering the question. "
-            "Save your findings to Redis using redis_set with descriptive keys "
-            "(e.g. 'extract:<topic>:findings') so results are available to the orchestrator. "
-            "Return the Redis keys where findings were saved — do not return the raw content directly."
+            "You are an expert at extracting and analyzing web content. "
+            "Follow these steps strictly:\n"
+            "1. Use redis_get ONCE per key to retrieve the URL list.\n"
+            "2. Use the extract tool to fetch the content of each URL. This is the critical step.\n"
+            "3. Analyze the extracted content and keep only facts relevant to the question.\n"
+            "4. Save your findings to Redis with redis_set (key: 'extract:<topic>:findings').\n"
+            "5. Return the Redis keys where findings were saved.\n\n"
+            "IMPORTANT: Do NOT call redis_get repeatedly on the same key. "
+            "Once you have the URLs, move to step 2 immediately."
         )
 
     @property

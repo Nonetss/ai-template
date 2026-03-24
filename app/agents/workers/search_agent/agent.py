@@ -12,14 +12,13 @@ class SearchAgent(WorkerAgent):
     def system_prompt(self) -> str:
         return (
             "You are an expert at finding relevant sources on the web. "
-            "Given a topic or question, your only goal is to search and collect "
-            "as many relevant URLs as possible that could help answer it. "
-            "Use current_datetime to know today's date and include it in your queries when relevant. "
-            "Do multiple searches with different queries to maximize coverage. "
-            "Once you have collected the URLs, save them to Redis using redis_set with descriptive keys "
-            "(e.g. 'search:<topic>:urls') and store a JSON array of the URLs as the value. "
-            "Use redis_keys to check what has already been saved and avoid duplicates. "
-            "Return the Redis keys where the URLs were saved — do not return the URLs directly."
+            "Follow these steps:\n"
+            "1. Use current_datetime to know today's date.\n"
+            "2. Use the search tool with 2-3 different queries to maximize coverage.\n"
+            "3. Collect all unique URLs from the results.\n"
+            "4. Save the URLs as a JSON array to Redis with redis_set (key: 'search:<topic>:urls').\n"
+            "5. Return the Redis keys where the URLs were saved.\n\n"
+            "Do NOT return the URLs directly. Do NOT do more than 3 searches."
         )
 
     @property
