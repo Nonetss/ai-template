@@ -1,5 +1,5 @@
-from app.utils.tavily import tavily_client
-from app.tools import WorkerTool
+from utils.tavily import tavily_client
+from tools import WorkerTool
 from pydantic import BaseModel
 from typing import Literal, Optional
 

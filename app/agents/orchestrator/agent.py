@@ -1,6 +1,6 @@
 from agents import OrchestratorAgent, WorkerAgent
-from agents.search_agent.agent import SearchAgent
-from agents.extract_agent.agent import ExtractAgent
+from agents.workers.search_agent.agent import SearchAgent
+from agents.workers.extract_agent.agent import ExtractAgent
 
 
 class Orchestrator(OrchestratorAgent):

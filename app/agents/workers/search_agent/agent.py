@@ -1,6 +1,7 @@
 from agents import WorkerAgent
 from tools import WorkerTool
 from tools.curl.search import search_tool
+from tools.datetime_tool import current_datetime_tool
 
 
 class SearchAgent(WorkerAgent):
@@ -19,4 +20,4 @@ class SearchAgent(WorkerAgent):
 
     @property
     def tools(self) -> list[WorkerTool]:
-        return [search_tool]
+        return [search_tool, current_datetime_tool]

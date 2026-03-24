@@ -55,11 +55,18 @@ class OrchestratorAgent(ABC):
     @abstractmethod
     def workers(self) -> list[WorkerAgent]: ...
 
+    @property
+    def tools(self) -> list[WorkerTool]:
+        return []
+
     def __init__(self):
+        all_tools = [w.to_tool() for w in self.workers] + [
+            t.to_tool() for t in self.tools
+        ]
         self._agent = Agent(
             model,
             system_prompt=self.system_prompt,
-            toolsets=[FunctionToolset(tools=[w.to_tool() for w in self.workers])],
+            toolsets=[FunctionToolset(tools=all_tools)],
         )
 
     async def run(self, prompt: str, deps: BaseModel | None = None) -> str:
