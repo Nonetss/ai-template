@@ -1,9 +1,10 @@
-from agents import OrchestratorAgent, WorkerAgent
+from noneai import OrchestratorAgent, WorkerAgent, WorkerTool, set_model, set_compact_model
 from agents.workers.search_agent.agent import SearchAgent
 from agents.workers.extract_agent.agent import ExtractAgent
-from tools import WorkerTool
 from tools.date.datetime_tool import current_datetime_tool
 from tools.redis.redis_tools import redis_get_tool, redis_keys_tool
+
+from core import model as default_model, compact_model as default_compact_model
 
 
 class SynthesisAgent(OrchestratorAgent):
@@ -62,6 +63,10 @@ if __name__ == "__main__":
     logfire.instrument_pydantic_ai()
 
     async def main():
+        # `noneai` necesita un modelo por defecto para inicializar el OrchestratorAgent.
+        set_model(default_model)
+        set_compact_model(default_compact_model)
+
         agent = SynthesisAgent()
 
         pregunta = (

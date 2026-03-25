@@ -22,9 +22,16 @@ from core import (
     LOGFIRE_ENVIRONMENT,
     LOGFIRE_SEND_TO_LOGFIRE,
     LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT,
+    model as default_model,
+    compact_model as default_compact_model,
 )
-from tools import WorkerTool
-from agents import WorkerAgent, OrchestratorAgent
+from noneai import (
+    WorkerTool,
+    WorkerAgent,
+    OrchestratorAgent,
+    set_model,
+    set_compact_model,
+)
 
 os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = LOGFIRE_OTEL_EXPORTER_OTLP_ENDPOINT
 os.environ["OTEL_METRICS_EXPORTER"] = "none"
@@ -202,6 +209,11 @@ class MainOrchestrator(OrchestratorAgent):
 
 
 async def main():
+    # `noneai` requires a default model for any Agent/Orchestrator that
+    # doesn't explicitly set `model = ...` on the class.
+    set_model(default_model)
+    set_compact_model(default_compact_model)
+
     orchestrator = MainOrchestrator()
     deps = AppDeps(user_name="Carlos", language="fr")
 

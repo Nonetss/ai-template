@@ -1,7 +1,7 @@
 from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field
 from utils.tavily import tavily_client
-from tools import WorkerTool
+from noneai import WorkerTool
 
 
 class ExtractRequest(BaseModel):

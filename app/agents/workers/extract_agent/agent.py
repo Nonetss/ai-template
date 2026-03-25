@@ -1,5 +1,4 @@
-from agents import WorkerAgent
-from tools import WorkerTool
+from noneai import WorkerAgent, WorkerTool
 from tools.curl.extract import extract_tool
 
 

@@ -8,11 +8,11 @@ dependencies = [
     "fastapi[standard]>=0.135.2",
     "load-dotenv>=0.1.0",
     "logfire[fastapi]>=4.30.0",
+    "noneai[persistence] @ git+https://github.com/Nonetss/noneAI.git",
     "pydantic-ai>=1.70.0",
     "pydantic-ai-skills>=0.5.1",
     "pydantic-ai-slim[google,logfire,openai,openrouter]>=1.70.0",
     "redis>=7.4.0",
-    "tortoise-orm[asyncpg]>=0.25.0",
     "scalar-fastapi>=1.8.1",
     "tavily-python>=0.7.23",
 ]

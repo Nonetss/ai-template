@@ -1,5 +1,4 @@
-from agents import WorkerAgent
-from tools import WorkerTool
+from noneai import WorkerAgent, WorkerTool
 from tools.curl.search import search_tool
 from tools.date.datetime_tool import current_datetime_tool
 from tools.redis.redis_tools import redis_set_tool, redis_keys_tool

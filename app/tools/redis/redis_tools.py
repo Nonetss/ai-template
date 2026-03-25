@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from utils.redis import redis_client
-from tools import WorkerTool
+from noneai import WorkerTool
 
 
 DEFAULT_TTL = 1800  # 30 minutes
